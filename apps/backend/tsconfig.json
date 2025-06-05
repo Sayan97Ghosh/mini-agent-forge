@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2020",                     // JavaScript version output
-    "module": "CommonJS",                   // Module system (Node.js standard)
+    "module": "es2022",                   // Module system (Node.js standard)
     "lib": ["ES2020"],                      // Standard library to include
     "outDir": "./dist",                     // Output folder for compiled JS
     "rootDir": "./src",                     // Source folder for TS files
