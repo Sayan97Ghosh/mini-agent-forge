@@ -1,0 +1,12 @@
+export type ToolType = 'web-search' | 'calculator';
+
+export interface RunRequest {
+  prompt: string;
+  tool: ToolType;
+}
+
+export interface RunLog extends RunRequest {
+  response: string;
+  timestamp?: Date;
+  tokens?: number;
+}
