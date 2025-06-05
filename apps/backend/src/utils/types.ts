@@ -10,3 +10,8 @@ export interface RunLog extends RunRequest {
   timestamp?: Date;
   tokens?: number;
 }
+
+export interface GeminiResponse {
+  response: string;
+  tokensUsed: number;
+}
