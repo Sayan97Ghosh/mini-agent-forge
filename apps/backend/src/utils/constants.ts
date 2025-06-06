@@ -12,5 +12,5 @@ export const SAVE_LOG_QUERY = `
     INSERT INTO run_logs (prompt, tool, response, timestamp, tokens)
     VALUES ($1, $2, $3, $4, $5)
   `;
-export const DUCK_DUCK_GO_BASE_URL = `https://html.duckduckgo.com`;
+export const DUCK_DUCK_GO_BASE_URL = "https://html.duckduckgo.com";
 

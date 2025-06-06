@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import { RunLog } from '../utils/types';
-import { CREATE_LOG_TABLE_QUERY, SAVE_LOG_QUERY } from '../utils/contants';
+import { CREATE_LOG_TABLE_QUERY, SAVE_LOG_QUERY } from '../utils/constants';
 import dotenv from 'dotenv';
 
 dotenv.config();

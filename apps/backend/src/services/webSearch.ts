@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import * as cheerio from 'cheerio';
-import { DUCK_DUCK_GO_BASE_URL } from '../utils/contants';
+import { DUCK_DUCK_GO_BASE_URL } from '../utils/constants';
 
 export async function performWebSearch(prompt: string): Promise<{ title: string; link: string }[]> {
   const query = encodeURIComponent(prompt);
