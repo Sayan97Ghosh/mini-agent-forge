@@ -1,11 +1,12 @@
 
 import './App.css'
+import HomePage from './pages'
 
 function App() {
 
   return (
     <>
-      <h1>Initial Folder & Setup done </h1>
+    <HomePage/>
     </>
   )
 }
