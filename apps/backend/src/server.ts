@@ -1,48 +1,90 @@
-import dotenv from 'dotenv';
-import router from './api/routes';
-import Fastify from 'fastify';
+import dotenv from "dotenv";
+import router from "./api/routes";
+import Fastify from "fastify";
+import fs from "fs";
+import path from "path";
+import fastifyHelmet from "@fastify/helmet";
+import fastifyRateLimit from "@fastify/rate-limit";
+
 dotenv.config();
 
+const isDev = process.env.NODE_ENV === "development";
 
-const fastify = Fastify({
+const fastifyOptions:any = {
   logger: {
-    level: process.env.LOG_LEVEL || 'info',
-    transport: process.env.NODE_ENV === 'development' ? {
-      target: 'pino-pretty'
-    } : undefined
+    level: process.env.LOG_LEVEL || "info",
+    transport: isDev ? { target: "pino-pretty" } : undefined,
   },
-  bodyLimit: 1024 * 1024,
+  bodyLimit: 1024 * 1024, // 1MB
   trustProxy: true,
   keepAliveTimeout: 72000,
-  connectionTimeout: 10000 
-});
+  connectionTimeout: 10000,
+};
+
+if (!isDev) {
+  try {
+    fastifyOptions.https = {
+      key: fs.readFileSync(path.resolve(process.env.SSL_KEY_PATH || " ")),
+      cert: fs.readFileSync(path.resolve(process.env.SSL_CERT_PATH || " ")),
+    };
+  } catch (err) {
+    const error = err as Error;
+    console.error("Failed to load SSL certificates:", error.message);
+    process.exit(1);
+  }
+}
+
+const fastify = Fastify(fastifyOptions);
+
+async function registerPlugins() {
+  if (!isDev) {
+    await fastify.register(fastifyHelmet, {
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'", "'unsafe-inline'"],
+          objectSrc: ["'none'"],
+          upgradeInsecureRequests: [],
+        },
+      },
+    });
+
+    await fastify.register(fastifyRateLimit, {
+      max: parseInt(process.env.RATE_LIMIT_MAX || "100", 10),
+      timeWindow: process.env.RATE_LIMIT_WINDOW || "1 minute",
+    });
+  }
+}
 
 async function registerRoutes() {
-  await fastify.register(router, { prefix: '/api/v1' });
+  await fastify.register(router, { prefix: "/api/v1" });
 }
 async function start() {
   try {
+    await registerPlugins();
     await registerRoutes();
-    
-    const PORT = parseInt(process.env.PORT || '3000', 10);
-    const HOST = process.env.HOST || '0.0.0.0';
-    
+
+    const PORT = parseInt(process.env.PORT || "8082", 10);
+    const HOST = process.env.HOST || "0.0.0.0";
+
     await fastify.listen({ port: PORT, host: HOST });
-    console.log(`Fastify server running at http://${HOST}:${PORT}`);
+    console.log(
+      `Server running at ${isDev ? "http" : "https"}://${HOST}:${PORT}`
+    );
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);
   }
 }
 
-process.on('SIGINT', async () => {
-  console.log('Received SIGINT, shutting down gracefully...');
+process.on("SIGINT", async () => {
+  console.log("Received SIGINT, shutting down gracefully...");
   await fastify.close();
   process.exit(0);
 });
 
-process.on('SIGTERM', async () => {
-  console.log('Received SIGTERM, shutting down gracefully...');
+process.on("SIGTERM", async () => {
+  console.log("Received SIGTERM, shutting down gracefully...");
   await fastify.close();
   process.exit(0);
 });
