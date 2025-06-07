@@ -5,12 +5,13 @@ import fs from "fs";
 import path from "path";
 import fastifyHelmet from "@fastify/helmet";
 import fastifyRateLimit from "@fastify/rate-limit";
+import fastifyCors from "@fastify/cors";
 
 dotenv.config();
 
 const isDev = process.env.NODE_ENV === "development";
 
-const fastifyOptions:any = {
+const fastifyOptions: any = {
   logger: {
     level: process.env.LOG_LEVEL || "info",
     transport: isDev ? { target: "pino-pretty" } : undefined,
@@ -37,6 +38,12 @@ if (!isDev) {
 const fastify = Fastify(fastifyOptions);
 
 async function registerPlugins() {
+  await fastify.register(fastifyCors, {
+    origin: process.env.CLIENT_ORIGIN || (isDev ? "*" : false),
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+    credentials: true,
+  });
   if (!isDev) {
     await fastify.register(fastifyHelmet, {
       contentSecurityPolicy: {
@@ -44,14 +51,23 @@ async function registerPlugins() {
           defaultSrc: ["'self'"],
           scriptSrc: ["'self'", "'unsafe-inline'"],
           objectSrc: ["'none'"],
-          upgradeInsecureRequests: [],
+          upgradeInsecureRequests: isDev ? [] : ["https:"],
         },
       },
+      hsts: { maxAge: 31536000, includeSubDomains: true }, // Strict-Transport-Security in prod
+      xFrameOptions: { action: "deny" }, // Prevent clickjacking
+      xContentTypeOptions: true, // Prevent MIME-type sniffing
+      xXssProtection: true, // Enable XSS filtering
     });
 
     await fastify.register(fastifyRateLimit, {
       max: parseInt(process.env.RATE_LIMIT_MAX || "100", 10),
       timeWindow: process.env.RATE_LIMIT_WINDOW || "1 minute",
+      errorResponseBuilder: () => ({
+        statusCode: 429,
+        error: 'Too Many Requests',
+        message: 'Rate limit exceeded. Please try again later.',
+      })
     });
   }
 }
