@@ -10,7 +10,8 @@ const pool = new Pool({
 
 async function initDB() {
   try {
-    await pool.query('SELECT NOW()');
+    await pool.query("SET TIME ZONE 'UTC';");
+    // await pool.query('SELECT NOW()');
     console.log('Postgres DB connected');
     await pool.query(CREATE_LOG_TABLE_QUERY);
     console.log('run_logs table ensured');
@@ -22,7 +23,7 @@ async function initDB() {
 initDB();
 
 export async function saveRunLog(log: RunLog): Promise<void> {
-  const values = [log.prompt, log.tool, log.response, log.timestamp, log.tokens];
+  const values = [log.userId,log.prompt, log.tool, log.response, log.timestamp, log.tokens];
 
   try {
     await pool.query(SAVE_LOG_QUERY, values);

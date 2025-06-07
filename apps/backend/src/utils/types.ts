@@ -6,6 +6,7 @@ export interface RunRequest {
 }
 
 export interface RunLog extends RunRequest {
+  userId:string,
   response: string;
   timestamp?: Date;
   tokens?: number;

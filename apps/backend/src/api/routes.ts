@@ -7,14 +7,15 @@ import { cacheRun, getCachedRun } from "../db/redis";
 import { saveRunLog } from "../db/postgres";
 import { RunLog } from "../utils/types";
 
-// Convert Zod schema to JSON Schema for Fastify, no need zod
+// Convert Zod schema to JSON Schema for Fastify,
 
 const requestBodySchema = {
   type: "object",
-  required: ["prompt", "tool"],
+  required: ["prompt", "tool", "userId"],
   properties: {
     prompt: { type: "string", minLength: 1, maxLength: 5000 },
     tool: { type: "string", enum: ["web-search", "calculator"] },
+    userId: { type: "string", minLength: 1, maxLength: 16 },
   },
   additionalProperties: false,
 };
@@ -54,6 +55,7 @@ const errorResponseSchema = {
 interface RunRequest {
   prompt: string;
   tool: "web-search" | "calculator";
+  userId: string;
 }
 
 export default async function routes(fastify: FastifyInstance) {
@@ -106,11 +108,11 @@ export default async function routes(fastify: FastifyInstance) {
       },
     },
     async (request, reply) => {
-      const { prompt, tool } = request.body;
+      const { prompt, tool, userId } = request.body;
       const startTime = Date.now();
 
       try {
-        const cachedUserQueryAndAiResponse = await getCachedRun(tool, prompt);
+        const cachedUserQueryAndAiResponse = await getCachedRun(userId, tool, prompt);
 
         if (cachedUserQueryAndAiResponse) {
           fastify.log.info({ msg: "Cache hit", tool, prompt });
@@ -161,7 +163,9 @@ export default async function routes(fastify: FastifyInstance) {
           responseTime: Date.now() - startTime,
           tokenCount: responseData.totalTokenCount,
         });
+
         const log: RunLog = {
+          userId,
           prompt,
           tool,
           response: JSON.stringify(responseData),
