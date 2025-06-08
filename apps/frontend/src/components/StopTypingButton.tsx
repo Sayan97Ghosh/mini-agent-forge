@@ -1,5 +1,3 @@
-import React from 'react'
-
 function StopTypingButton({ onClick }: { onClick: () => void }) {
   return (
     <button

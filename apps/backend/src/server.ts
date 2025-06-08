@@ -88,6 +88,7 @@ async function start() {
       `Server running at ${isDev ? "http" : "https"}://${HOST}:${PORT}`
     );
   } catch (err) {
+    console.error('Fastify failed to start:', err);
     fastify.log.error(err);
     process.exit(1);
   }

@@ -15,7 +15,9 @@ export default function PromptForm() {
   const [history, setHistory] = useState<HistoryEntry[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [stopTyping, setStopTyping] = useState(false);
+   // @ts-ignore
   const [timings, setTimings] = useState({ render: 0, query: 0, response: 0 });
+  
   const responseContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -84,7 +86,7 @@ export default function PromptForm() {
       loading: true,
       responseTimeStamp: "",
     };
-
+    // @ts-ignore
     setHistory((prev) => [...prev, newEntry]);
 
     const userId = sessionStorage.getItem("userId") || uuidv4();
