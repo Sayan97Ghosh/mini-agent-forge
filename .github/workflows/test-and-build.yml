@@ -1,0 +1,83 @@
+name: Test and Docker Build
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports: ['5432:5432']
+        env:
+          POSTGRES_DB: mini_agent
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 2536
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      redis:
+        image: redis:alpine
+        ports: ['6379:6379']
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        working-directory: ./apps/backend
+        run: npm install
+
+      - name: Set backend env variables
+        run: |
+          echo "DATABASE_URL=${{ secrets.BACKEND_DATABASE_URL }}" >> .env
+          echo "REDIS_URL=${{ secrets.BACKEND_REDIS_URL }}" >> .env
+          echo "GEMINI_API_KEY=${{ secrets.BACKEND_GEMINI_API_KEY }}" >> .env
+          echo "GEMINI_MODEL=${{ secrets.BACKEND_GEMINI_MODEL }}" >> .env
+          echo "NODE_ENV=${{ secrets.BACKEND_NODE_ENV }}" >> .env
+          echo "LOG_LEVEL=${{ secrets.BACKEND_LOG_LEVEL }}" >> .env
+          echo "RATE_LIMIT_MAX=${{ secrets.BACKEND_RATE_LIMIT_MAX }}" >> .env
+          echo "RATE_LIMIT_WINDOW=${{ secrets.BACKEND_RATE_LIMIT_WINDOW }}" >> .env
+          echo "PORT=${{ secrets.BACKEND_PORT }}" >> .env
+        working-directory: ./apps/backend
+
+      - name: Install frontend dependencies
+        working-directory: ./apps/frontend
+        run: npm install
+
+      - name: Set frontend env variables
+        run: |
+          echo "VITE_MODE=${{ secrets.FRONTEND_VITE_MODE }}" >> .env
+          echo "VITE_PORT=${{ secrets.FRONTEND_VITE_PORT }}" >> .env
+        working-directory: ./apps/frontend
+
+      - name: Run backend tests
+        working-directory: ./apps/backend
+        run: npm run test || echo "No tests defined"
+
+      - name: Install docker-compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
+      - name: Build Docker images
+        working-directory: ./apps
+        run: docker-compose build

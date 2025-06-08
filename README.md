@@ -69,6 +69,33 @@ POST /api/v1/query
   "tool": "calculator"
 }
 ```
+**🐳 Docker Setup**
+
+Step 1: Go to the root directory
+```bash
+cd mini-agent-forge/
+```
+Step 2: Run Docker Compose
+``` bash
+docker-compose up --build
+```
+This will spin up:
+
+Backend
+
+Frontend
+
+PostgreSQL
+
+Redis
+
+Once started:
+
+Backend: http://localhost:8082
+
+Frontend: http://localhost:4173
+
+
 
 🧰 Local Development Setup
 ✅ Prerequisites
