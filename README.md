@@ -160,4 +160,4 @@ Frontend will be live at: http://localhost:5173
 
 👨‍💻 Author
 Sayan Ghosh
-Full Stack Developer | AI-Driven Backend Archit
+Full Stack Developer | AI-Driven Backend Architect
