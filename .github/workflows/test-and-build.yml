@@ -54,5 +54,10 @@ jobs:
         working-directory: ./apps/backend
         run: npm run test || echo "No tests defined"
 
+      - name: Install docker-compose
+        run: |
+          sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+          sudo chmod +x /usr/local/bin/docker-compose
+
       - name: Build Docker images
         run: docker-compose build
