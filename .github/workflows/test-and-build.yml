@@ -19,9 +19,9 @@ jobs:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: 2536
         options: >-
-          --health-cmd "pg_isready -U postgres" 
-          --health-interval 10s 
-          --health-timeout 5s 
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 5
 
       redis:
@@ -29,8 +29,8 @@ jobs:
         ports: ['6379:6379']
         options: >-
           --health-cmd "redis-cli ping"
-          --health-interval 10s 
-          --health-timeout 5s 
+          --health-interval 10s
+          --health-timeout 5s
           --health-retries 5
 
     steps:
@@ -46,9 +46,28 @@ jobs:
         working-directory: ./apps/backend
         run: npm install
 
+      - name: Set backend env variables
+        run: |
+          echo "DATABASE_URL=${{ secrets.BACKEND_DATABASE_URL }}" >> .env
+          echo "REDIS_URL=${{ secrets.BACKEND_REDIS_URL }}" >> .env
+          echo "GEMINI_API_KEY=${{ secrets.BACKEND_GEMINI_API_KEY }}" >> .env
+          echo "GEMINI_MODEL=${{ secrets.BACKEND_GEMINI_MODEL }}" >> .env
+          echo "NODE_ENV=${{ secrets.BACKEND_NODE_ENV }}" >> .env
+          echo "LOG_LEVEL=${{ secrets.BACKEND_LOG_LEVEL }}" >> .env
+          echo "RATE_LIMIT_MAX=${{ secrets.BACKEND_RATE_LIMIT_MAX }}" >> .env
+          echo "RATE_LIMIT_WINDOW=${{ secrets.BACKEND_RATE_LIMIT_WINDOW }}" >> .env
+          echo "PORT=${{ secrets.BACKEND_PORT }}" >> .env
+        working-directory: ./apps/backend
+
       - name: Install frontend dependencies
         working-directory: ./apps/frontend
         run: npm install
+
+      - name: Set frontend env variables
+        run: |
+          echo "VITE_MODE=${{ secrets.FRONTEND_VITE_MODE }}" >> .env
+          echo "VITE_PORT=${{ secrets.FRONTEND_VITE_PORT }}" >> .env
+        working-directory: ./apps/frontend
 
       - name: Run backend tests
         working-directory: ./apps/backend
@@ -60,4 +79,5 @@ jobs:
           sudo chmod +x /usr/local/bin/docker-compose
 
       - name: Build Docker images
+        working-directory: ./apps
         run: docker-compose build
