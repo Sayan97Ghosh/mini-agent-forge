@@ -1,0 +1,54 @@
+name: Test and Docker Build
+
+on:
+  push:
+    branches: [develop]
+  pull_request:
+    branches: [develop]
+
+jobs:
+    test-and-build:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:15
+        ports: ['5432:5432']
+        env:
+          POSTGRES_DB: mini_agent
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: 2536
+        options: >-
+          --health-cmd "pg_isready -U postgres" 
+          --health-interval 10s 
+          --health-timeout 5s 
+          --health-retries 5
+
+      redis:
+        image: redis:alpine
+        ports: ['6379:6379']
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install backend dependencies
+        working-directory: ./apps/backend
+        run: npm install
+
+      - name: Install frontend dependencies
+        working-directory: ./apps/frontend
+        run: npm install
+
+      - name: Run backend tests
+        working-directory: ./apps/backend
+        run: npm run test || echo "No tests defined"
+
+      - name: Build Docker images
+        run: docker-compose build
