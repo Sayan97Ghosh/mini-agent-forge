@@ -15,7 +15,7 @@ const requestBodySchema = {
   properties: {
     prompt: { type: "string", minLength: 1, maxLength: 5000 },
     tool: { type: "string", enum: ["web-search", "calculator"] },
-    userId: { type: "string", minLength: 1, maxLength: 16 },
+    userId: { type: "string", minLength: 1, maxLength: 100 },
   },
   additionalProperties: false,
 };
