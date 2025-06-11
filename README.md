@@ -65,7 +65,7 @@ POST /api/v1/query
 
 {
   "userId": "user123",
-  "prompt": "23 * 42?",
+  "prompt": "23 * 42",
   "tool": "calculator"
 }
 ```
