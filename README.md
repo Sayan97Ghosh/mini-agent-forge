@@ -64,8 +64,8 @@ Mini AI Forge is a smart backend system designed to accept user prompts and tool
 POST /api/v1/query
 
 {
-  "userId": "user-123",
-  "prompt": "What is 23 * 42?",
+  "userId": "user123",
+  "prompt": "23 * 42?",
   "tool": "calculator"
 }
 ```
