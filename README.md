@@ -9,7 +9,7 @@ Mini AI Forge is a smart backend system designed to accept user prompts and tool
 1. **Frontend** sends a request to `POST /api/v1/query` with:
    - `prompt` (text)
    - `userId` (string/UUID)
-   - `tool` (enum: `web_search` | `calculator`)
+   - `tool` (enum: `web-search` | `calculator`)
 
 2. **Backend Workflow**:
    - 🔍 **Step 1**: Check **Redis cache** using a unique key generated from:
@@ -59,6 +59,7 @@ Mini AI Forge is a smart backend system designed to accept user prompts and tool
 ---
 
 ## 🧪 Example Request
+Query : 1
 
 ```json
 POST /api/v1/query
@@ -69,6 +70,19 @@ POST /api/v1/query
   "tool": "calculator"
 }
 ```
+Query : 2
+
+```json
+POST /api/v1/query
+
+{
+  "userId": "user123",
+  "prompt": "Explain artificial intelligence (AI) in simple terms",
+  "tool": "web-search"
+}
+```
+
+
 **🐳 Docker Setup**
 
 Step 1: Go to the root directory
