@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import type { HistoryEntry } from '../utils/validator';
 function HistoryEntryComponent({
   entry,
@@ -8,6 +9,9 @@ function HistoryEntryComponent({
   index: number;
   isTyping: boolean;
 }) {
+
+    const [createdTime] = useState(() => Date.now());
+
   return (
     <div className="bg-green-50 border border-green-200 rounded-lg p-5">
       <h3 className="text-lg font-semibold text-gray-800">Prompt: {index + 1}</h3>
@@ -17,7 +21,7 @@ function HistoryEntryComponent({
         </span>
 
         <span className="text-sm text-gray-500 ml-4 whitespace-nowrap">
-          {new Date().toLocaleString()}
+          {new Date(createdTime).toLocaleString()}
         </span>
       </p>
 

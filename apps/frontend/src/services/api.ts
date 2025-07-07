@@ -1,6 +1,6 @@
 // services/api.ts
 import axios from "axios";
-import { queryEndpoint } from "../utils/constants";
+import { BASE_URL, QUERY_ENDPOINT } from "../utils/constants";
 
 export interface RunRequest {
   prompt: string;
@@ -14,12 +14,11 @@ export interface RunResponse {
   totalTokenCount: number;
   timestamp: string;
 }
-const port:number = import.meta.env.VITE_PORT || 8082 ;
-const baseUrl: string = import.meta.env.VITE_MODE == "development" ? `http://localhost:${port}`: "Example of production base URL";
+
 export const runPrompt = async (data: RunRequest): Promise<RunResponse> => {
   try {
     const res = await axios.post<RunResponse>(
-      `${baseUrl}/api/v1/${queryEndpoint}`,
+      `${BASE_URL}/api/v1/${QUERY_ENDPOINT}`,
       data
     );
     // console.log("line 20", res.data);
